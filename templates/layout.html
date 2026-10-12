@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do App</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="themeToggle" class="btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-3">
+        🌙 Dark Mode
+    </button>
+
+    <div class="container mt-5" style="max-width: 600px;">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Dark Mode Script -->
+    <script>
+        const htmlElement = document.documentElement;
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // Load saved theme on startup
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        htmlElement.setAttribute('data-bs-theme', savedTheme);
+        themeToggle.innerText = savedTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+
+        // Toggle theme on click
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            htmlElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.innerText = newTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+        });
+    </script>
+
+    <!-- Show/Hide Password Script -->
+    <script>
+        function togglePassword(inputId, buttonElement) {
+            const inputField = document.getElementById(inputId);
+            
+            if (inputField.type === "password") {
+                inputField.type = "text";
+                buttonElement.innerText = "Hide";
+            } else {
+                inputField.type = "password";
+                buttonElement.innerText = "Show";
+            }
+        }
+    </script>
+</body>
+</html>

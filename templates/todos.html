@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>To-Do List</h3>
+    <div>
+        <span class="me-3">Hi, {{ user_name }}</span>
+        <a href="/logout" class="btn btn-outline-secondary btn-sm">Log out</a>
+    </div>
+</div>
+
+<div class="card p-4 mb-4">
+    <form action="/todos/add" method="POST" class="d-flex">
+        <input type="text" name="title" class="form-control me-2" placeholder="What needs to be done?" required>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+</div>
+
+<!-- Search and Filter Bar -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <!-- Search Form -->
+    <form action="/todos" method="GET" class="d-flex" style="flex: 1; min-width: 200px;">
+        <input type="hidden" name="filter" value="{{ current_filter }}">
+        <input type="text" name="search" value="{{ search_query }}" class="form-control form-control-sm me-2" placeholder="Search tasks...">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+        {% if search_query %}
+            <a href="/todos?filter={{ current_filter }}" class="btn btn-sm btn-link text-decoration-none">Clear</a>
+        {% endif %}
+    </form>
+
+    <!-- Filter Buttons -->
+    <div class="btn-group" role="group">
+        <a href="/todos?filter=all&search={{ search_query }}" class="btn btn-sm {% if current_filter == 'all' or not current_filter %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+        <a href="/todos?filter=open&search={{ search_query }}" class="btn btn-sm {% if current_filter == 'open' %}btn-primary{% else %}btn-outline-primary{% endif %}">Not Done</a>
+        <a href="/todos?filter=done&search={{ search_query }}" class="btn btn-sm {% if current_filter == 'done' %}btn-primary{% else %}btn-outline-primary{% endif %}">Done</a>
+    </div>
+</div>
+
+{% if not todos %}
+    <p class="text-center text-muted">No tasks found. Try a different search or add a new task!</p>
+{% else %}
+    <ul class="list-group">
+        {% for todo in todos %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            
+            <!-- Form to toggle done/not done -->
+            <form action="/todos/{{ todo.todo_id }}/toggle" method="POST" class="m-0 me-2">
+                <input type="hidden" name="is_done" value="{{ '0' if todo.is_done else '1' }}">
+                <input class="form-check-input mt-0" type="checkbox" onchange="this.form.submit()" {% if todo.is_done %}checked{% endif %}>
+            </form>
+
+            <!-- Form to edit title -->
+            <form action="/todos/{{ todo.todo_id }}/edit" method="POST" class="d-flex flex-grow-1 mx-2 m-0">
+                <input type="text" name="title" value="{{ todo.title }}" class="form-control form-control-sm shadow-none {% if todo.is_done %}text-decoration-line-through text-muted{% endif %}">
+                <button type="submit" class="btn btn-sm btn-outline-success ms-1">Save</button>
+            </form>
+
+            <!-- Form to delete -->
+            <form action="/todos/{{ todo.todo_id }}/delete" method="POST" class="m-0" onsubmit="return confirm('Are you sure?');">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+            
+        </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}
